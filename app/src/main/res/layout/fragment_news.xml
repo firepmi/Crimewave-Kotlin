@@ -1,0 +1,16 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.omadahealth.github.swipyrefreshlayout.library.SwipyRefreshLayout
+        android:id="@+id/mSwipyRefreshLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:srl_direction="bottom">
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvNews"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+    </com.omadahealth.github.swipyrefreshlayout.library.SwipyRefreshLayout>
+</FrameLayout>

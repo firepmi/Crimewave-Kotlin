@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_gradient_white">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone">
+        <com.crime.wave.selectContent.SelectContentBackgroundView
+            android:id="@+id/selectContentBackgroundView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerInside"
+            />
+        <TextView
+            android:id="@+id/btnSelectContent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select"
+            android:textColor="#84ceca"
+            android:textSize="12sp"
+            android:padding="5dp"/>
+    </RelativeLayout>
+    <com.yarolegovich.discretescrollview.DiscreteScrollView
+        android:id="@+id/contentPicker"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"/>
+</FrameLayout>

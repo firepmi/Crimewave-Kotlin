@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/mapView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+    <LinearLayout
+        android:id="@+id/mainLayout"
+        android:layout_alignParentTop="true"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"/>
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_top"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:background="@android:color/transparent"
+        android:minHeight="?attr/actionBarSize">
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:orientation="horizontal">
+            <ImageView
+                android:layout_gravity="center_vertical"
+                android:id="@+id/ivBack"
+                android:layout_width="30dp"
+                android:layout_height="20dp"
+                android:src="@drawable/icon_back"
+                android:tint="@color/white"
+                android:contentDescription="@string/back" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:layout_gravity="center"
+                android:textSize="18sp"
+                android:id="@+id/tvTitle" />
+            <ImageView
+                android:layout_gravity="end"
+                android:id="@+id/ivFilter"
+                android:layout_width="30dp"
+                android:layout_height="20dp"
+                android:src="@drawable/icon_filter"
+                android:tint="@color/white"
+                android:contentDescription="@string/filter" />
+        </FrameLayout>
+    </androidx.appcompat.widget.Toolbar>
+
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/viewPager"
+        android:layout_below="@+id/tabLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
+        app:tabMode="fixed"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:elevation="6dp"
+        app:tabTextColor="#CCC"
+        app:tabTextAppearance="@style/MyTabLayoutTextAppearance"
+        app:tabSelectedTextColor="#FFF"
+        android:layout_alignParentBottom="true"
+        tools:ignore="UnusedAttribute" />
+</RelativeLayout>

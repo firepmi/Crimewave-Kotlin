@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Crime Wave</string>
+    <string name="background">Background</string>
+    <string name="back">Back</string>
+    <string name="filter">filter</string>
+
+    <string name="dialog_ok">Ok</string>
+    <string name="view_source">View Source</string>
+    <string name="full_screen">Full Screen</string>
+    <string name="news_articles">News Articles</string>
+    <string name="news_image">News Image</string>
+    <string name="loading">Loading</string>
+</resources>

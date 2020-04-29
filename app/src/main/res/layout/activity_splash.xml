@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <ImageView
+        android:id="@+id/img_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/img_bg0"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="@string/background" />
+    <com.github.glomadrian.grav.GravView
+        android:id="@+id/grav"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        app:colorGenerator="com.github.glomadrian.grav.generator.paint.ArrayColorGenerator"
+        app:array_colors="@array/Spectral"
+        app:pointGenerator="com.github.glomadrian.grav.generator.point.RegularPointGenerator"
+        app:regular_cell_size="100"
+        app:regular_variance="200"
+        app:gravGenerator="com.github.glomadrian.grav.generator.grav.BallGenerator"
+        app:ball_size="2dp"
+        app:animationGenerators="@array/BallWaveAnimations"
+        app:side_to_side_min_duration="2000"
+        app:side_to_side_max_duration="5000"
+        app:side_to_side_direction="downToUp"
+        app:shake_variance="50dp"
+        app:ball_size_from_size="1dp"
+        app:ball_size_to_size="4dp"
+        app:shake_direction="horizontal"
+        />
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="150dp"
+        android:layout_height="170dp"
+        android:src="@drawable/icon_logo"
+        android:layout_centerInParent="true"/>
+    <TextView
+        android:id="@+id/txtLogo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Crime Wave"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:textSize="30sp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/logo"/>
+</RelativeLayout>
