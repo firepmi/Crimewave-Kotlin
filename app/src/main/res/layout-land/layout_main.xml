@@ -80,10 +80,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
                 android:layout_toEndOf="@id/ivFullScreen"
+                android:layout_toStartOf="@+id/ivSettings"
                 app:tabMode="scrollable"
                 app:tabIndicatorColor="@color/white"
                 app:tabTextColor="@color/light_grey"
                 app:tabSelectedTextColor="@color/white"/>
+                <ImageView
+                    android:id="@+id/ivSettings"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_settings"
+                    android:tint="@color/white"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginStart="5dp"
+                    android:contentDescription="@string/settings" />
             </RelativeLayout>
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/newsRecyclerView"

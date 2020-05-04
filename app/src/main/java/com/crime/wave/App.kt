@@ -34,6 +34,7 @@ class App : MultiDexApplication() {
     val titleColors =
         arrayOf("#4a90e2", "#639c21", "#f8e71c", "#f5a623", "#e72929", "#6b0100")
     var crimeLevel = 0
+    var isCustomLocation = false
 
     val levelTexts = arrayOf(
         "Minimal",

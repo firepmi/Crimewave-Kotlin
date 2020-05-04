@@ -24,12 +24,14 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.crime.wave.crimeRadar.CrimeRadarFragment
 import com.crime.wave.crimeRadar.ShootingHistoryFragment
+import com.crime.wave.menu.LocationActivity
 import com.crime.wave.news.NewsCardAdapter
 import com.crime.wave.news.NewsCardAdapter.ItemClickListener
 import com.crime.wave.news.NewsItem
 import com.crime.wave.selectContent.SelectContentFragment
 import com.crime.wave.utils.LocationUpdaterService
 import com.crime.wave.wave.WaveWordsFragment
+import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
 import kotlinx.android.synthetic.main.activity_main.*
@@ -37,7 +39,7 @@ import kotlinx.android.synthetic.main.layout_main.*
 import org.json.JSONObject
 
 
-class MainActivity : AppCompatActivity(), ItemClickListener {
+class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNavigationItemSelectedListener {
     private var data: Array<NewsItem> = arrayOf()
     private var crimeRadarFragment = CrimeRadarFragment()
     private var waveWordsFragment = WaveWordsFragment()
@@ -133,6 +135,11 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         getNews(0)
 
         ivFullScreen.setOnClickListener {onFullScreenClicked()}
+        ivSettings.setOnClickListener {
+            drawer_layout.openDrawer(GravityCompat.END);
+        }
+
+        nav_view.setNavigationItemSelectedListener(this)
     }
     private fun onFullScreenClicked(){
         if(llMap?.visibility == View.GONE) {
@@ -243,19 +250,23 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         val stringRequest = StringRequest(Request.Method.GET, link, Response.Listener { response ->
             val resultObject = JSONObject(response)
             val dataArray = resultObject.getJSONArray("articles")
-            data = arrayOf()
-            for (i in 0 until dataArray.length()) {
-                data += NewsItem(
-                    dataArray.getJSONObject(i).getString("title"),
-                    dataArray.getJSONObject(i).getString("description"),
-                    dataArray.getJSONObject(i).getString("urlToImage"),
-                    dataArray.getJSONObject(i).getString("url"),
-                    dataArray.getJSONObject(i).getString("publishedAt"))
-            }
+            if (dataArray.length() > 0) {
+                data = arrayOf()
+                for (i in 0 until dataArray.length()) {
+                    data += NewsItem(
+                        dataArray.getJSONObject(i).getString("title"),
+                        dataArray.getJSONObject(i).getString("description"),
+                        dataArray.getJSONObject(i).getString("urlToImage"),
+                        dataArray.getJSONObject(i).getString("url"),
+                        dataArray.getJSONObject(i).getString("publishedAt")
+                    )
+                }
 
-            newsRecyclerView.adapter = NewsCardAdapter(this@MainActivity, data,  this@MainActivity, newLayoutType)
-            if(data.isNotEmpty()) {
-                emptyCard.visibility = View.GONE
+                newsRecyclerView.adapter =
+                    NewsCardAdapter(this@MainActivity, data, this@MainActivity, newLayoutType)
+                if (data.isNotEmpty()) {
+                    emptyCard.visibility = View.GONE
+                }
             }
         },
         Response.ErrorListener {
@@ -302,24 +313,16 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-// Handle navigation view item clicks here.
         when (item.itemId) {
-            R.id.nav_camera-> {
+            R.id.navLocation-> {
+                val i = Intent(this, LocationActivity::class.java)
+                startActivity(i)
+                overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
+            }
+            R.id.navColorSystem-> {
 
             }
-            R.id.nav_gallery-> {
-
-            }
-            R.id.nav_slideshow-> {
-
-            }
-            R.id.nav_manage-> {
-
-            }
-            R.id.nav_share-> {
-
-            }
-            R.id.nav_send-> {
+            R.id.navTermsOfService-> {
 
             }
         }

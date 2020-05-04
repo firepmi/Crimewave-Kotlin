@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     card_view:cardCornerRadius="10dp"
@@ -18,17 +16,21 @@
             android:id="@+id/videoView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
-        <ScrollView
+
+        <EditText
+            android:id="@+id/txtWords"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center">
-            <TextView
-                android:id="@+id/txtWords"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="20dp"
-                android:lineSpacingExtra="3dp"
-                />
-        </ScrollView>
+            android:padding="20dp"
+            android:lineSpacingExtra="3dp"
+            android:background="@color/transparent"
+            android:inputType="none"
+            android:cursorVisible="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:gravity="top"
+            android:editable="false"
+            />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

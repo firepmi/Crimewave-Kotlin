@@ -1,14 +1,13 @@
 package com.crime.wave.selectContent
 
-import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
-import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
+import com.crime.wave.App
 import com.crime.wave.MainActivity
 import com.crime.wave.R
 import com.yarolegovich.discretescrollview.DiscreteScrollView
@@ -58,8 +57,7 @@ class SelectContentFragment : Fragment(),
                     view.btnSelectContent
                 )
             }
-            val myCustomFont : Typeface? = ResourcesCompat.getFont(context!!, R.font.nexa_bold)
-            view.btnSelectContent.typeface = myCustomFont
+            view.btnSelectContent.typeface = App.instance!!.nexaBoldFont
         }
         return view
     }

@@ -2,6 +2,7 @@ package com.crime.wave.utils
 
 import android.content.Context
 import androidx.preference.PreferenceManager
+import com.crime.wave.App
 
 /**
  * Created by Mobile World on 4/10/2020.
@@ -61,6 +62,11 @@ class MPreferenceManager {
                 return 0.0;
             }
             ////TODO for test
+
+            var k = key
+            if(App.instance!!.isCustomLocation) {
+                k += "custom"
+            }
 //            if (key == "lat") {
 //                return 36.121439
 //            }
@@ -69,9 +75,19 @@ class MPreferenceManager {
 //            }
             val sp =
                 PreferenceManager.getDefaultSharedPreferences(context)
+            return sp.getFloat(k, 0f).toDouble()
+        }
+        fun readCurrentLocationInformation(
+            context: Context?,
+            key: String?
+        ): Double {
+            if (context == null) {
+                return 0.0;
+            }
+            val sp =
+                PreferenceManager.getDefaultSharedPreferences(context)
             return sp.getFloat(key, 0f).toDouble()
         }
-
         fun saveBoolInformation(
             context: Context?,
             key: String?,

@@ -25,10 +25,11 @@
             android:paddingTop="4dp"
             android:textAllCaps="true"
             android:textColor="@android:color/black"
-            android:textSize="12sp"
+            android:textSize="10sp"
             android:textStyle="bold"
             android:visibility="invisible"
-            tools:text="Washington" />
+            tools:text="Washington"
+            android:gravity="center"/>
 
         <ImageView
             android:id="@+id/city_image"

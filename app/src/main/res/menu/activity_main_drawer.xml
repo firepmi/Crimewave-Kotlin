@@ -2,16 +2,16 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group>
         <item
-            android:id="@+id/nav_profile"
-            android:icon="@drawable/ic_profile"
-            android:title="Profile"/>
+            android:id="@+id/navLocation"
+            android:icon="@drawable/ic_location"
+            android:title="Location"/>
         <item
-            android:id="@+id/nav_messages"
-            android:icon="@drawable/ic_messages"
-            android:title="Messages"/>
+            android:id="@+id/navColorSystem"
+            android:icon="@drawable/icon_color_scale"
+            android:title="Color Scale System"/>
         <item
-            android:id="@+id/nav_friends"
-            android:icon="@drawable/ic_friends"
-            android:title="Friends"/>
+            android:id="@+id/navTermsOfService"
+            android:icon="@drawable/icon_terms_of_service"
+            android:title="Terms of Service"/>
     </group>
 </menu>

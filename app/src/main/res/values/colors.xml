@@ -8,6 +8,7 @@
     <color name="black">#000</color>
     <color name="light_grey">#ccc</color>
     <color name="transparent">#0000</color>
+    <color name="black_overlay">#6000</color>
     <color name="colorBackColorBackgroundWhite">#40000000</color>
     <color name="grayIconTint">#727272</color>
 
