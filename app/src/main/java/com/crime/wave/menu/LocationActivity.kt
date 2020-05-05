@@ -7,15 +7,19 @@ import android.location.Geocoder
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
+import android.widget.Toast.LENGTH_LONG
 import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
 import com.crime.wave.App
+import com.crime.wave.MainActivity
 import com.crime.wave.R
 import com.crime.wave.utils.MPreferenceManager
 import com.schibstedspain.leku.LATITUDE
 import com.schibstedspain.leku.LONGITUDE
 import com.schibstedspain.leku.LocationPickerActivity
 import kotlinx.android.synthetic.main.activity_location.*
+import java.io.IOException
 import java.util.*
 
 
@@ -36,9 +40,9 @@ class LocationActivity : AppCompatActivity(){
         }
         cvCustomLocation.setOnClickListener {
             App.instance!!.isCustomLocation = true
-            val customlat = MPreferenceManager.readDoubleInformation(applicationContext, "customlat")
-            val customlon = MPreferenceManager.readDoubleInformation(applicationContext, "customlon")
-            if( customlat == 0.0 && customlon == 0.0) {
+            val customLat = MPreferenceManager.readLocationInformation(this@LocationActivity, "customlat")
+            val customLon = MPreferenceManager.readLocationInformation(this@LocationActivity, "customlon")
+            if( customLat == 0.0 && customLon == 0.0) {
                 onSelectCustomLocation()
             }
             refreshView()
@@ -48,54 +52,12 @@ class LocationActivity : AppCompatActivity(){
         refreshView()
     }
 
+    override fun onStop() {
+        super.onStop()
+        MainActivity.instance!!.crimeRadarFragment.getDataLocation()
+    }
+
     private fun refreshView(){
-        val latitude = MPreferenceManager.readCurrentLocationInformation(applicationContext, "lat")
-        val longitude = MPreferenceManager.readCurrentLocationInformation(applicationContext, "lon")
-        if(latitude == 0.0 || longitude == 0.0) {
-            txtCity1.text = "-"
-        }
-        else {
-            val geoCoder = Geocoder(this, Locale.getDefault())
-            val addresses =
-                geoCoder.getFromLocation(latitude, longitude, 1)
-            val cityName = addresses[0].locality
-            val stateName = addresses[0].adminArea
-            val countryName = addresses[0].countryName
-            val zipCode = addresses[0].postalCode
-
-            txtCity1.text = cityName
-            if(zipCode != null ) txtState1.text = "$stateName $zipCode"
-            else txtState1.text = stateName
-            if(countryName != "United State" && countryName != "US") {
-                if(zipCode != null ) txtState1.text = "$stateName $zipCode $countryName"
-                else txtState1.text = "$stateName $countryName"
-            }
-        }
-        val customLatitude = MPreferenceManager.readDoubleInformation(applicationContext, "customlat")
-        val customLongitude = MPreferenceManager.readDoubleInformation(applicationContext, "customlon")
-        if(customLatitude == 0.0 && customLongitude == 0.0) {
-            txtCity2.text = "-"
-            txtState2.text = ""
-        }
-        else {
-            val geoCoder = Geocoder(this, Locale.getDefault())
-            val addresses =
-                geoCoder.getFromLocation(customLatitude, customLongitude, 1)
-            if (addresses.size == 0) return
-            val cityName = addresses[0].locality
-            val stateName = addresses[0].adminArea
-            val countryName = addresses[0].countryName
-            val zipCode = addresses[0].postalCode
-
-            txtCity2.text = cityName
-            if(zipCode != null ) txtState2.text = "$stateName $zipCode"
-            else txtState2.text = stateName
-            if(countryName != "United State" && countryName != "US") {
-                if(zipCode != null ) txtState2.text = "$stateName $zipCode $countryName"
-                else txtState2.text = "$stateName $countryName"
-            }
-        }
-
         if(App.instance!!.isCustomLocation) {
             imgLocationArrow1.visibility = View.INVISIBLE
             imgLocationArrow2.visibility = View.VISIBLE
@@ -104,10 +66,85 @@ class LocationActivity : AppCompatActivity(){
             imgLocationArrow1.visibility = View.VISIBLE
             imgLocationArrow2.visibility = View.INVISIBLE
         }
+        val latitude = MPreferenceManager.readLocationInformation(this@LocationActivity, "lat")
+        val longitude = MPreferenceManager.readLocationInformation(this@LocationActivity, "lon")
+        if(latitude == 0.0 || longitude == 0.0) {
+            txtCity1.text = "-"
+            txtState1.text = ""
+        }
+        else {
+            try {
+                val geoCoder = Geocoder(this, Locale.getDefault())
+                val addresses =
+                    geoCoder.getFromLocation(latitude, longitude, 1)
+                val cityName = addresses[0].locality
+                val stateName = addresses[0].adminArea
+                val countryName = addresses[0].countryName
+                val zipCode = addresses[0].postalCode
+
+                txtCity1.text = cityName
+                if (zipCode != null) txtState1.text = "$stateName $zipCode"
+                else txtState1.text = stateName
+                if (countryName != "United State" && countryName != "US") {
+                    if (zipCode != null) txtState1.text = "$stateName $zipCode $countryName"
+                    else txtState1.text = "$stateName $countryName"
+                }
+            }
+            catch (e: IOException) {
+                Toast.makeText(this, "Service not Available, Try again later", LENGTH_LONG).show()
+                finish()
+            }
+        }
+
+        val customLatitude = MPreferenceManager.readLocationInformation(this@LocationActivity, "customlat")
+        val customLongitude = MPreferenceManager.readLocationInformation(this@LocationActivity, "customlon")
+        if(customLatitude == 0.0 && customLongitude == 0.0) {
+            txtCity2.text = "-"
+            txtState2.text = ""
+        }
+        else {
+            try {
+                val geoCoder = Geocoder(this, Locale.getDefault())
+                val addresses =
+                    geoCoder.getFromLocation(customLatitude, customLongitude, 1)
+                if (addresses.size == 0) {
+                    txtCity2.text = "-"
+                    txtState2.text = ""
+                    return
+                }
+                val cityName = addresses[0].locality
+                val stateName = addresses[0].adminArea
+                val countryName = addresses[0].countryName
+                val zipCode = addresses[0].postalCode
+
+                txtCity2.text = cityName
+                if (zipCode != null) txtState2.text = "$stateName $zipCode"
+                else txtState2.text = stateName
+                if (countryName != "United State" && countryName != "US") {
+                    if (zipCode != null) txtState2.text = "$stateName $zipCode $countryName"
+                    else txtState2.text = "$stateName $countryName"
+                }
+            }
+            catch (e: IOException) {
+                Toast.makeText(this, "Service not Available, Try again later", LENGTH_LONG).show()
+                finish()
+            }
+        }
     }
     private fun onSelectCustomLocation(){
+        var latitude = MPreferenceManager.readLocationInformation(this@LocationActivity, "customlat")
+        var longitude = MPreferenceManager.readLocationInformation(this@LocationActivity, "customlon")
+        if(latitude == 0.0 && longitude == 0.0) {
+            latitude = MPreferenceManager.readLocationInformation(this@LocationActivity, "lat")
+            longitude = MPreferenceManager.readLocationInformation(this@LocationActivity, "lon")
+        }
+        if(latitude == 0.0 && longitude == 0.0) {
+            latitude = 36.121439
+            longitude = -115.150098
+        }
+
         val locationPickerIntent = LocationPickerActivity.Builder()
-            .withLocation(36.121439, -115.150098)
+            .withLocation(latitude, longitude)
             .withGeolocApiKey("AIzaSyBX-HDsCLh2zSa2U7auZOeT1q3PwJZhax8")
 //                .withSearchZone("es_ES")
 //                .withSearchZone(SearchZoneRect(LatLng(26.525467, -18.910366), LatLng(43.906271, 5.394197)))
@@ -138,25 +175,10 @@ class LocationActivity : AppCompatActivity(){
                 Log.d("LATITUDE****", latitude.toString())
                 val longitude = data.getDoubleExtra(LONGITUDE, 0.0)
                 Log.d("LONGITUDE****", longitude.toString())
-//                val address = data.getStringExtra(LOCATION_ADDRESS)
-//                Log.d("ADDRESS****", address.toString())
-//                val postalCode = data.getStringExtra(ZIPCODE)
-//                Log.d("POSTALCODE****", postalCode.toString())
-//                val fullAddress = data.getParcelableExtra<Address>(ADDRESS)
-//                if (fullAddress != null) {
-//                    Log.d("FULL ADDRESS****", fullAddress.toString())
-//                }
-                MPreferenceManager.saveDoubleInformation(
-                    applicationContext,
-                    "customlat",
-                    latitude.toFloat()
-                )
-                MPreferenceManager.saveDoubleInformation(
-                    applicationContext,
-                    "customlon",
-                    longitude.toFloat()
-                )
+                MPreferenceManager.saveDoubleInformation(this@LocationActivity,"customlat",latitude.toFloat())
+                MPreferenceManager.saveDoubleInformation(this@LocationActivity,"customlon",longitude.toFloat())
 
+                App.instance!!.isCustomLocation = true
                 refreshView()
             }
         }

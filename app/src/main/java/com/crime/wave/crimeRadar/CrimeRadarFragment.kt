@@ -25,6 +25,7 @@ import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.crime.wave.App
+import com.crime.wave.MainActivity
 import com.crime.wave.R
 import com.crime.wave.utils.MPreferenceManager
 import com.crime.wave.utils.ShowProgressDialog
@@ -115,7 +116,8 @@ class CrimeRadarFragment : Fragment() {
             map?.mapType = mapTypes[mapType % mapTypes.size]
         }
         view.ivFullScreen.setOnClickListener {
-            activity?.startActivity(Intent(activity, CrimeRadarActivity::class.java))
+//            activity?.startActivity(Intent(activity, CrimeRadarActivity::class.java))
+            MainActivity.instance!!.onMapFullScreen()
         }
         return view
     }
@@ -173,6 +175,7 @@ class CrimeRadarFragment : Fragment() {
                     res.getJSONArray("crimes")
                 }
                 crimeLevel = checkForLocation()
+                App.instance!!.crimeLevel = crimeLevel
                 setTitleBar()
             },
             Response.ErrorListener {
@@ -205,6 +208,7 @@ class CrimeRadarFragment : Fragment() {
             map!!.animateCamera(CameraUpdateFactory.newLatLngZoom(latlng, 13.0f))
             markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.blue_dot))
             map!!.addMarker(markerOptions)
+
             return crimeLevel
         }
         var highColor = 0
@@ -275,7 +279,7 @@ class CrimeRadarFragment : Fragment() {
                     activity?.let { it1 -> ShowProgressDialog.showProgressDialog(it1, "") }
 
                     val queue = Volley.newRequestQueue(activity)
-                    val link: String = App.instance!!.newsUrl + "page=1&country=us"
+                    val link: String = snippet[1]
 
                     val stringRequest = StringRequest(
                         Request.Method.GET, link, Response.Listener { response ->
@@ -408,8 +412,11 @@ class CrimeRadarFragment : Fragment() {
             val num = distance[i].toFloat()
             distanceAverage += num
         }
-        val avg =
+        var avg =
             (timeAverage + distanceAverage + dateAverage + offset).toFloat() / 3
+        if (timeAverage == 0f && distanceAverage == 0f && dateAverage == 0f ) {
+            avg = 0f
+        }
         ratings = avg.roundToInt()
         if (ratings > 5) {
             ratings = 5

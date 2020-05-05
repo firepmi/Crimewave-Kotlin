@@ -16,21 +16,19 @@ import kotlinx.android.synthetic.main.item_news.view.*
  */
 class NewsCardAdapter(
     context: Context?,
-    private val mData: Array<NewsItem>,
+    private var mData: Array<NewsItem>,
     private var mClickListener: ItemClickListener,
-    private val type: Int = 0
+    private var type: Int = 0
 ) :
     RecyclerView.Adapter<NewsCardAdapter.ViewHolder?>() {
     private val mInflater: LayoutInflater = LayoutInflater.from(context)
 
     // inflates the row layout from xml when needed
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view: View
-        if (type == 0) {
-            view = mInflater.inflate(R.layout.item_news, parent, false)
-        }
-        else {
-            view = mInflater.inflate(R.layout.item_news_list, parent, false)
+        val view: View = if (type == 0) {
+            mInflater.inflate(R.layout.item_news, parent, false)
+        } else {
+            mInflater.inflate(R.layout.item_news_list, parent, false)
         }
         return ViewHolder(view)
     }
@@ -42,6 +40,15 @@ class NewsCardAdapter(
     ) {
         val item: NewsItem = mData[position]
         holder.bind(item, position)
+        if(position == itemCount - 1) {
+            mClickListener.onLoadMore()
+        }
+    }
+
+    fun setData(data: Array<NewsItem>, t:Int){
+        mData = data
+        type = t
+        notifyDataSetChanged()
     }
 
     // total number of rows
@@ -73,6 +80,7 @@ class NewsCardAdapter(
     // parent activity will implement this method to respond to click events
     interface ItemClickListener {
         fun onItemClick(position: Int)
+        fun onLoadMore()
     }
 
 }

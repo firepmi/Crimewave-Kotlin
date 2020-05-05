@@ -1,10 +1,12 @@
 package com.crime.wave
 
 import android.Manifest
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -23,8 +25,9 @@ import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.crime.wave.crimeRadar.CrimeRadarFragment
-import com.crime.wave.crimeRadar.ShootingHistoryFragment
+import com.crime.wave.menu.ColorRatingScaleActivity
 import com.crime.wave.menu.LocationActivity
+import com.crime.wave.menu.PdfViewerActivity
 import com.crime.wave.news.NewsCardAdapter
 import com.crime.wave.news.NewsCardAdapter.ItemClickListener
 import com.crime.wave.news.NewsItem
@@ -41,24 +44,29 @@ import org.json.JSONObject
 
 class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNavigationItemSelectedListener {
     private var data: Array<NewsItem> = arrayOf()
-    private var crimeRadarFragment = CrimeRadarFragment()
+    var crimeRadarFragment = CrimeRadarFragment()
     private var waveWordsFragment = WaveWordsFragment()
     private var fineLocationPermissionRequest = 1
     private var tabString = arrayOf(
         "US News",
         "business",
         "entertainment",
-        "general",
+//        "general",
         "health",
         "science",
         "sports",
-        "technology"
+        "technology",
+        "politics",
+        "world news"
     )
     private var newLayoutType = 0
+    private var page = 0
+    private var isLoading = false
     companion object {
         var instance: MainActivity? = null
             private set
     }
+    var newsAdapter: NewsCardAdapter? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -80,13 +88,14 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
         supportFragmentManager.beginTransaction()
             .replace(R.id.contentLayout, crimeRadarFragment).commitAllowingStateLoss()
 
+        newsAdapter = NewsCardAdapter(this@MainActivity, data,  this@MainActivity)
         newsRecyclerView.apply {
             layoutManager = LinearLayoutManager(
                 this@MainActivity,
                 LinearLayoutManager.HORIZONTAL,
                 false
             )
-            adapter = NewsCardAdapter(this@MainActivity, data,  this@MainActivity)
+            adapter = newsAdapter
         }
 
         if (ActivityCompat.checkSelfPermission(this@MainActivity,
@@ -106,6 +115,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
         for (tab in tabString) {
             tabLayout.addTab(tabLayout.newTab().setText(tab))
         }
+
         tabLayout.addOnTabSelectedListener(object : OnTabSelectedListener {
             override fun onTabReselected(tab: TabLayout.Tab?) {
 
@@ -116,6 +126,11 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
             }
 
             override fun onTabSelected(tab: TabLayout.Tab) {
+                emptyCard.visibility = View.VISIBLE
+                page = 0
+                data = arrayOf()
+                isLoading = false
+                newsAdapter!!.setData(data,newLayoutType)
                 getNews(tab.position)
             }
         })
@@ -132,16 +147,19 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
             }
         }
         txtLoading.typeface = App.instance!!.nexaBoldFont
+        page = 0
+        data = arrayOf()
+        isLoading = false
         getNews(0)
 
-        ivFullScreen.setOnClickListener {onFullScreenClicked()}
+        ivFullScreen.setOnClickListener {onNewsFullScreenClicked()}
         ivSettings.setOnClickListener {
             drawer_layout.openDrawer(GravityCompat.END);
         }
 
         nav_view.setNavigationItemSelectedListener(this)
     }
-    private fun onFullScreenClicked(){
+    private fun onNewsFullScreenClicked(){
         if(llMap?.visibility == View.GONE) {
             llMap?.visibility = View.VISIBLE
 
@@ -159,6 +177,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
                     LinearLayoutManager.HORIZONTAL,
                     false
                 )
+//                newsAdapter!!.setData(data,newLayoutType)
                 newsRecyclerView.adapter =
                     NewsCardAdapter(this@MainActivity, data, this@MainActivity, newLayoutType)
             }
@@ -180,12 +199,13 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
                     LinearLayoutManager.VERTICAL,
                     false
                 )
+                newsAdapter!!.setData(data,newLayoutType)
                 newsRecyclerView.adapter =
                     NewsCardAdapter(this@MainActivity, data, this@MainActivity, newLayoutType)
             }
         }
     }
-    fun onShootingMapFullScreen(){
+    fun onMapFullScreen(){
         if(rlNews.visibility == View.GONE){
             rlNews.visibility = View.VISIBLE
             selectContentLayout.visibility = View.VISIBLE
@@ -196,10 +216,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
         }
         else {
             rlNews.visibility = View.GONE
-            selectContentLayout.visibility = View.GONE
             if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 guidelineMain.setGuidelinePercent(0f)
                 guidelineMap.setGuidelinePercent(0f)
+                selectContentLayout.visibility = View.GONE
             }
         }
     }
@@ -208,7 +228,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
         return if(llMap?.visibility != View.GONE)
             false
         else {
-            onFullScreenClicked()
+            onNewsFullScreenClicked()
             true
         }
     }
@@ -218,7 +238,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
         return if(llMap?.visibility == View.GONE)
             false
         else {
-            onFullScreenClicked()
+            onNewsFullScreenClicked()
             true
         }
     }
@@ -231,39 +251,54 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
         overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
     }
 
+    override fun onLoadMore() {
+        getNews(tabLayout.selectedTabPosition)
+    }
+
     private fun getNews(index: Int) {
-
+        if (isLoading) return
+        isLoading = true
+        var p = page + 1
         val queue = Volley.newRequestQueue(this)
-        var link: String = App.instance!!.newsUrl + "page=1&country=us"
-
-//        if(index == tabString.size - 1 ) {
-//            val i = Intent(this, NewsActivity::class.java)
-//            startActivity(i)
-//            overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
-//            return
-//        }
-//        else
-        if(index != 0) {
-            link = App.instance!!.newsUrl + "country=us&category=" + tabString[index]
+        var link: String = App.instance!!.newsUrl + "page=$p&country=us"
+        when (index) {
+            0 -> {
+                link = App.instance!!.newsUrl + "page=$p&country=us"
+            }
+            in 1..6 -> {
+                link = App.instance!!.newsUrl + "page=$p&country=us&category=" + tabString[index]
+            }
+            7 -> {
+                link = "http://newsapi.org/v2/everything?page=$p&apiKey=73373c784bd24a679fafc03522618936&language=en&q=" + tabString[index]
+            }
+            8 -> {
+                link = "http://newsapi.org/v2/top-headlines?page=$p&apiKey=73373c784bd24a679fafc03522618936&language=en"
+            }
         }
 
+        Log.d("news link", link)
         val stringRequest = StringRequest(Request.Method.GET, link, Response.Listener { response ->
             val resultObject = JSONObject(response)
             val dataArray = resultObject.getJSONArray("articles")
             if (dataArray.length() > 0) {
-                data = arrayOf()
                 for (i in 0 until dataArray.length()) {
-                    data += NewsItem(
-                        dataArray.getJSONObject(i).getString("title"),
-                        dataArray.getJSONObject(i).getString("description"),
-                        dataArray.getJSONObject(i).getString("urlToImage"),
-                        dataArray.getJSONObject(i).getString("url"),
-                        dataArray.getJSONObject(i).getString("publishedAt")
-                    )
+                    if (dataArray.getJSONObject(i).getString("title") != "" && dataArray.getJSONObject(i).getString("description") != "null" ) {
+                        data += NewsItem(
+                            dataArray.getJSONObject(i).getString("title"),
+                            dataArray.getJSONObject(i).getString("description"),
+                            dataArray.getJSONObject(i).getString("urlToImage"),
+                            dataArray.getJSONObject(i).getString("url"),
+                            dataArray.getJSONObject(i).getString("publishedAt")
+                        )
+                        data = data.distinct().toTypedArray()
+                    }
                 }
 
-                newsRecyclerView.adapter =
-                    NewsCardAdapter(this@MainActivity, data, this@MainActivity, newLayoutType)
+                page++
+                isLoading = false
+//                newsRecyclerView.adapter =
+//                    NewsCardAdapter(this@MainActivity, data, this@MainActivity, newLayoutType)
+                newsAdapter!!.setData(data,newLayoutType)
                 if (data.isNotEmpty()) {
                     emptyCard.visibility = View.GONE
                 }
@@ -271,25 +306,18 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
         },
         Response.ErrorListener {
             it?.printStackTrace()
+            isLoading = false
         })
         queue.add(stringRequest)
     }
     fun onSelectContent(index:Int) {
         when {
-            index == 4 -> {
-                supportFragmentManager.beginTransaction()
-                    .setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
-                    .replace(R.id.contentLayout,
-                        ShootingHistoryFragment()).commitAllowingStateLoss()
-                supportFragmentManager.executePendingTransactions()
-            }
-            index <= 8 -> {
+            index < 8 -> {
                 supportFragmentManager.beginTransaction()
                     .setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
                     .replace(R.id.contentLayout, crimeRadarFragment).commitAllowingStateLoss()
                 supportFragmentManager.executePendingTransactions()
-                if (index < 4 ) crimeRadarFragment.selectedCategory(index)
-                else crimeRadarFragment.selectedCategory(index-1)
+                crimeRadarFragment.selectedCategory(index)
             }
             else -> {
                 supportFragmentManager.beginTransaction()
@@ -319,11 +347,35 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
                 startActivity(i)
                 overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
             }
-            R.id.navColorSystem-> {
-
+            R.id.navShootingHistory -> {
+                val urlString = App.instance!!.gunMapUrl
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(urlString))
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                intent.setPackage("com.android.chrome")
+                try {
+                    startActivity(intent)
+                } catch (ex: ActivityNotFoundException) {
+                    // Chrome browser presumably not installed and open Kindle Browser
+                    intent.setPackage(null)
+                    startActivity(intent)
+                }
+            }
+            R.id.navColorRatingScale -> {
+                val i = Intent(this, ColorRatingScaleActivity::class.java)
+                startActivity(i)
+                overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
+            }
+            R.id.navPrivacyPolicy-> {
+                val i = Intent(this, PdfViewerActivity::class.java)
+                i.putExtra("name", "privacypolicy.pdf")
+                startActivity(i)
+                overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
             }
             R.id.navTermsOfService-> {
-
+                val i = Intent(this, PdfViewerActivity::class.java)
+                i.putExtra("name", "termsofservice.pdf")
+                startActivity(i)
+                overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
             }
         }
 

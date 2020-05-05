@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
+import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -38,7 +39,19 @@ class WebViewActivity : AppCompatActivity(){
         webView.settings.useWideViewPort = true
         webView.settings.builtInZoomControls = true
         webView.settings.pluginState = WebSettings.PluginState.ON
+        webView.settings.loadWithOverviewMode = true
+        webView.settings.useWideViewPort = true
+        webView.settings.allowContentAccess = true
+        webView.settings.domStorageEnabled = true
+        webView.settings.blockNetworkLoads = false
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            webView.settings.safeBrowsingEnabled = false
+        }
+        webView.settings.setAppCacheEnabled(true)
+        webView.settings.setGeolocationEnabled(true)
+
         webView.webViewClient = CustomWebViewClient()
+        webView.webChromeClient = WebChromeClient()
         webView.loadUrl(url)
 
         btnBack.setOnClickListener {

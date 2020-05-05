@@ -2,7 +2,10 @@ package com.crime.wave.crimeRadar
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
@@ -312,7 +315,7 @@ class CrimeRadarActivity : AppCompatActivity() {
                     ShowProgressDialog.showProgressDialog(this@CrimeRadarActivity, "")
 
                     val queue = Volley.newRequestQueue(this)
-                    val link: String = App.instance!!.newsUrl + "page=1&country=us"
+                    val link: String = snippet[1]
 
                     val stringRequest = StringRequest(Request.Method.GET, link, Response.Listener { response ->
 //                        val resultObject = JSONObject(response)

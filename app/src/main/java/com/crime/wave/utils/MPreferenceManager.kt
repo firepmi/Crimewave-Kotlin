@@ -65,7 +65,7 @@ class MPreferenceManager {
 
             var k = key
             if(App.instance!!.isCustomLocation) {
-                k += "custom"
+                k = "custom$key"
             }
 //            if (key == "lat") {
 //                return 36.121439
@@ -77,7 +77,7 @@ class MPreferenceManager {
                 PreferenceManager.getDefaultSharedPreferences(context)
             return sp.getFloat(k, 0f).toDouble()
         }
-        fun readCurrentLocationInformation(
+        fun readLocationInformation(
             context: Context?,
             key: String?
         ): Double {

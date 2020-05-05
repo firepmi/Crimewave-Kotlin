@@ -13,7 +13,7 @@ class ContentStation private constructor() {
             ContentItem("Burglary", R.drawable.burglary, ContentLevel.LOW),
             ContentItem("Theft", R.drawable.thief, ContentLevel.MODERATE),
             ContentItem("Shooting", R.drawable.shooting, ContentLevel.ELEVATED),
-            ContentItem("Shooting History", R.drawable.icon_shooting_history, ContentLevel.PARTLY_CLOUDY),
+//            ContentItem("Shooting History", R.drawable.icon_shooting_history, ContentLevel.PARTLY_CLOUDY),
             ContentItem("Assault", R.drawable.assault, ContentLevel.HIGH),
             ContentItem("Vandalism", R.drawable.vandalism, ContentLevel.SEVERELY_HIGH),
             ContentItem("Arrest", R.drawable.arrest, ContentLevel.MOSTLY_CLOUDY),

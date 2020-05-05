@@ -30,14 +30,14 @@
         <activity android:name=".MainActivity" />
         <activity android:name=".WebViewActivity" />
         <activity android:name=".crimeRadar.CrimeRadarActivity" />
-        <activity android:name=".news.NewsActivity" />
         <activity android:name=".menu.LocationActivity" android:theme="@style/AppTheme.Transparent"/>
         <activity
             android:name="com.schibstedspain.leku.LocationPickerActivity"
             android:label="@string/leku_title_activity_location_picker"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:theme="@style/AppTheme.LocationPicker"
             android:windowSoftInputMode="adjustPan"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName=".menu.LocationActivity"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
@@ -45,8 +45,11 @@
                 android:resource="@xml/leku_searchable" />
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value=".menu.LocationActivity" />
         </activity>
+        <activity android:name=".menu.PdfViewerActivity" />
+        <activity android:name=".menu.ColorRatingScaleActivity" />
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBX-HDsCLh2zSa2U7auZOeT1q3PwJZhax8" />

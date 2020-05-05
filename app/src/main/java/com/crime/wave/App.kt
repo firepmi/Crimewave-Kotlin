@@ -18,7 +18,7 @@ class App : MultiDexApplication() {
         nexaBoldFont = ResourcesCompat.getFont(this, R.font.nexa_bold)
         nexaLightFont = ResourcesCompat.getFont(this, R.font.nexa_light)
 
-        Picasso.get().isLoggingEnabled = true
+//        Picasso.get().isLoggingEnabled = true
     }
 
     companion object {

@@ -4,14 +4,22 @@
         <item
             android:id="@+id/navLocation"
             android:icon="@drawable/ic_location"
-            android:title="Location"/>
+            android:title="@string/location"/>
         <item
-            android:id="@+id/navColorSystem"
+            android:id="@+id/navShootingHistory"
+            android:icon="@drawable/icon_shooting_history"
+            android:title="@string/shooting_history"/>
+        <item
+            android:id="@+id/navColorRatingScale"
             android:icon="@drawable/icon_color_scale"
-            android:title="Color Scale System"/>
+            android:title="@string/color_rating_scale"/>
+        <item
+            android:id="@+id/navPrivacyPolicy"
+            android:icon="@drawable/icon_privacy_policy"
+            android:title="@string/privacy_policy"/>
         <item
             android:id="@+id/navTermsOfService"
             android:icon="@drawable/icon_terms_of_service"
-            android:title="Terms of Service"/>
+            android:title="@string/terms_of_service"/>
     </group>
 </menu>

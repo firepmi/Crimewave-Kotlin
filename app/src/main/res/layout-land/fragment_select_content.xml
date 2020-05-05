@@ -12,7 +12,6 @@
         card_view:cardUseCompatPadding="false"
         card_view:cardPreventCornerOverlap="false"
         android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
         android:layout_marginBottom="10dp">
     <RelativeLayout
         android:layout_width="match_parent"

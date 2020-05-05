@@ -22,7 +22,7 @@
             android:paddingTop="10dp"
             android:textAllCaps="true"
             android:textColor="@android:color/black"
-            android:textSize="8sp"
+            android:textSize="6sp"
             android:textStyle="bold"
             android:visibility="invisible"
             tools:text="Washington"

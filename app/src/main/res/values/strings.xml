@@ -11,4 +11,9 @@
     <string name="news_image">News Image</string>
     <string name="loading">Loading</string>
     <string name="settings">Settings</string>
+    <string name="location">Location</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="terms_of_service">Terms of Service</string>
+    <string name="shooting_history">Shooting History</string>
+    <string name="color_rating_scale">Color Rating Scale</string>
 </resources>
