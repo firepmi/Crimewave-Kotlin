@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.ads.MobileAds
 import kotlinx.android.synthetic.main.activity_splash.*
 
 class SplashActivity : AppCompatActivity() {
@@ -47,5 +48,7 @@ class SplashActivity : AppCompatActivity() {
 
         txtLogo.typeface = App.instance!!.nexaBoldFont
         handler.postDelayed(r, 3000)
+
+        MobileAds.initialize(this) {}
     }
 }

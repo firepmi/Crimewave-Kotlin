@@ -56,6 +56,9 @@
         <service android:name=".utils.LocationUpdaterService"
             android:enabled="true"
             android:exported="true" />
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-2795479226639345~5985696026"/>
     </application>
 
 </manifest>

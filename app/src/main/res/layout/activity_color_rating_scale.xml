@@ -166,7 +166,7 @@
                         android:id="@+id/txtNormal4"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="means elevated Lavel"
+                        android:text="means Elevated Level"
                         android:textSize="16sp"
                         android:layout_marginStart="5dp"
                         android:layout_gravity="center"/>
@@ -243,7 +243,7 @@
                         android:id="@+id/txtBold6"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="ORANGE"
+                        android:text="DARK RED"
                         android:textSize="18sp"
                         android:layout_gravity="center"
                         android:layout_marginStart="15dp"
@@ -298,6 +298,5 @@
         android:id="@+id/tvTitle"
         android:text="@string/color_rating_scale"
         android:layout_marginTop="30dp"/>
-
 
 </RelativeLayout>

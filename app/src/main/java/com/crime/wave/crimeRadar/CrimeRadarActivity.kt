@@ -310,7 +310,7 @@ class CrimeRadarActivity : AppCompatActivity() {
                 }
             })
             map!!.setOnInfoWindowClickListener {
-                if (!it.title.equals("My Location")) {
+                if (it.title != "My Location") {
                     val snippet: Array<String> = it.snippet.split("@@@").toTypedArray()
                     ShowProgressDialog.showProgressDialog(this@CrimeRadarActivity, "")
 

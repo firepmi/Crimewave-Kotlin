@@ -1,2 +1,3 @@
 rootProject.name='Crime Wave'
-include ':app', ':grav', ':discreteScrollView','ColorDialog'
+include ':app', ':discreteScrollView','ColorDialog'
+//include ':grav'

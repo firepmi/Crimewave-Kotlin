@@ -10,6 +10,10 @@
             android:icon="@drawable/icon_shooting_history"
             android:title="@string/shooting_history"/>
         <item
+            android:id="@+id/navStore"
+            android:icon="@drawable/icon_store"
+            android:title="@string/store"/>
+        <item
             android:id="@+id/navColorRatingScale"
             android:icon="@drawable/icon_color_scale"
             android:title="@string/color_rating_scale"/>

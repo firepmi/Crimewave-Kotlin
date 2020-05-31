@@ -157,11 +157,9 @@ class CrimeRadarFragment : Fragment() {
     fun getDataLocation() {
         if(activity == null) return
         val url =
-            "http://api.spotcrime.com/crimes.json?lat=" + MPreferenceManager.readDoubleInformation(
-                activity,
-                "lat"
-            ).toString() + "&lon=" + MPreferenceManager.readDoubleInformation(activity, "lon")
-                .toString() + "&radius=0.01&key=" + App.instance!!.key + "&callback="
+            "http://api.spotcrime.com/crimes.json?lat=" + MPreferenceManager.readDoubleInformation(activity,"lat").toString() +
+                    "&lon=" + MPreferenceManager.readDoubleInformation(activity, "lon").toString() + "&radius=0.02&key=" +
+                    App.instance!!.key + "&callback="
 
         val queue = Volley.newRequestQueue(activity)
 
@@ -182,7 +180,7 @@ class CrimeRadarFragment : Fragment() {
                 it?.printStackTrace()
             })
         queue.add(stringRequest)
-
+        MainActivity.instance!!.onUpdateLocation()
     }
 
     private fun checkForLocation(): Int {

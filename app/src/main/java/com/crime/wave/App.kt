@@ -31,6 +31,7 @@ class App : MultiDexApplication() {
     val newsUrl =
         "https://newsapi.org/v2/top-headlines?apiKey=73373c784bd24a679fafc03522618936&"
     val gunMapUrl = "https://www.thetrace.org/features/gun-violence-interactive-shootings-map"
+    val storeUrl = "https://maniacogames.kincustom.com/"
     val titleColors =
         arrayOf("#4a90e2", "#639c21", "#f8e71c", "#f5a623", "#e72929", "#6b0100")
     var crimeLevel = 0

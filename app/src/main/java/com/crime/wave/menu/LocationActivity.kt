@@ -15,6 +15,7 @@ import com.crime.wave.App
 import com.crime.wave.MainActivity
 import com.crime.wave.R
 import com.crime.wave.utils.MPreferenceManager
+import com.google.android.gms.ads.AdRequest
 import com.schibstedspain.leku.LATITUDE
 import com.schibstedspain.leku.LONGITUDE
 import com.schibstedspain.leku.LocationPickerActivity
@@ -50,6 +51,9 @@ class LocationActivity : AppCompatActivity(){
         selectCustomLocation.setOnClickListener {onSelectCustomLocation()}
 
         refreshView()
+
+        val adRequest = AdRequest.Builder().build()
+        adView.loadAd(adRequest)
     }
 
     override fun onStop() {

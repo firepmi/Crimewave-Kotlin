@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
+import android.location.Geocoder
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -33,6 +34,7 @@ import com.crime.wave.news.NewsCardAdapter.ItemClickListener
 import com.crime.wave.news.NewsItem
 import com.crime.wave.selectContent.SelectContentFragment
 import com.crime.wave.utils.LocationUpdaterService
+import com.crime.wave.utils.MPreferenceManager
 import com.crime.wave.wave.WaveWordsFragment
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayout
@@ -40,7 +42,9 @@ import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.layout_main.*
 import org.json.JSONObject
-
+import java.io.IOException
+import java.net.URLEncoder
+import java.util.*
 
 class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNavigationItemSelectedListener {
     private var data: Array<NewsItem> = arrayOf()
@@ -48,6 +52,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
     private var waveWordsFragment = WaveWordsFragment()
     private var fineLocationPermissionRequest = 1
     private var tabString = arrayOf(
+        "custom news",
         "US News",
         "business",
         "entertainment",
@@ -56,12 +61,13 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
         "science",
         "sports",
         "technology",
-        "politics",
-        "world news"
+        "politics"
+//        "world news"
     )
     private var newLayoutType = 0
     private var page = 0
     private var isLoading = false
+    private var cityName = ""
     companion object {
         var instance: MainActivity? = null
             private set
@@ -97,7 +103,9 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
             )
             adapter = newsAdapter
         }
-
+        if (data.isNotEmpty()) {
+            emptyCard.visibility = View.GONE
+        }
         if (ActivityCompat.checkSelfPermission(this@MainActivity,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this@MainActivity,
@@ -178,8 +186,8 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
                     false
                 )
 //                newsAdapter!!.setData(data,newLayoutType)
-                newsRecyclerView.adapter =
-                    NewsCardAdapter(this@MainActivity, data, this@MainActivity, newLayoutType)
+                newsAdapter = NewsCardAdapter(this@MainActivity, data, this@MainActivity, newLayoutType)
+                newsRecyclerView.adapter = newsAdapter
             }
         }
         else {
@@ -200,8 +208,11 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
                     false
                 )
                 newsAdapter!!.setData(data,newLayoutType)
-                newsRecyclerView.adapter =
-                    NewsCardAdapter(this@MainActivity, data, this@MainActivity, newLayoutType)
+                newsAdapter = NewsCardAdapter(this@MainActivity, data, this@MainActivity, newLayoutType)
+                newsRecyclerView.adapter = newsAdapter
+                if (data.isNotEmpty()) {
+                    emptyCard.visibility = View.GONE
+                }
             }
         }
     }
@@ -243,6 +254,25 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
         }
     }
 
+    fun onUpdateLocation(){
+        val latitude = MPreferenceManager.readDoubleInformation(this, "lat")
+        val longitude = MPreferenceManager.readDoubleInformation(this, "lon")
+        if(latitude == 0.0 || longitude == 0.0) {
+            return
+        }
+        else {
+            try {
+                val geoCoder = Geocoder(this, Locale.getDefault())
+                val addresses =
+                    geoCoder.getFromLocation(latitude, longitude, 1)
+                cityName = addresses[0].locality
+                tabLayout.getTabAt(0)?.text = "$cityName News"
+            }
+            catch (e: IOException) {
+                Log.e("city name", "Service not Available")
+            }
+        }
+    }
     override fun onItemClick(position: Int) { //select news item
         Log.d("new click", "position $position")
         val i = Intent(this, WebViewActivity::class.java)
@@ -262,13 +292,20 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
         val queue = Volley.newRequestQueue(this)
         var link: String = App.instance!!.newsUrl + "page=$p&country=us"
         when (index) {
-            0 -> {
+            0 -> { //Local News
+                if (cityName != "") {
+                    tabLayout.getTabAt(0)?.text = "$cityName News"
+                    val cityParam: String = URLEncoder.encode(cityName, "utf-8")
+                    link = "http://newsapi.org/v2/everything?page=$p&apiKey=73373c784bd24a679fafc03522618936&q=$cityParam"
+                }
+            }
+            1 -> { //US News
                 link = App.instance!!.newsUrl + "page=$p&country=us"
             }
-            in 1..6 -> {
+            in 2..7 -> {
                 link = App.instance!!.newsUrl + "page=$p&country=us&category=" + tabString[index]
             }
-            7 -> {
+            7 -> {  //Politics
                 link = "http://newsapi.org/v2/everything?page=$p&apiKey=73373c784bd24a679fafc03522618936&language=en&q=" + tabString[index]
             }
             8 -> {
@@ -281,24 +318,44 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
             val resultObject = JSONObject(response)
             val dataArray = resultObject.getJSONArray("articles")
             if (dataArray.length() > 0) {
+                var refresh = false
+                if (data.isEmpty()) {
+                    refresh = true
+                }
                 for (i in 0 until dataArray.length()) {
                     if (dataArray.getJSONObject(i).getString("title") != "" && dataArray.getJSONObject(i).getString("description") != "null" ) {
-                        data += NewsItem(
-                            dataArray.getJSONObject(i).getString("title"),
-                            dataArray.getJSONObject(i).getString("description"),
-                            dataArray.getJSONObject(i).getString("urlToImage"),
-                            dataArray.getJSONObject(i).getString("url"),
-                            dataArray.getJSONObject(i).getString("publishedAt")
-                        )
-                        data = data.distinct().toTypedArray()
+                        val itemTitle = dataArray.getJSONObject(i).getString("title")
+                        val itemDescription = dataArray.getJSONObject(i).getString("description")
+                        val itemImage = dataArray.getJSONObject(i).getString("urlToImage")
+                        val itemUrl = dataArray.getJSONObject(i).getString("url")
+                        var ok = true
+                        for (dt in data) {
+                            if (dt.title == itemTitle || dt.description == itemDescription || dt.image == itemImage || dt.url == itemUrl) {
+                                ok = false
+                                break
+                            }
+                        }
+                        if (ok) {
+                            data += NewsItem(
+                                dataArray.getJSONObject(i).getString("title"),
+                                dataArray.getJSONObject(i).getString("description"),
+                                dataArray.getJSONObject(i).getString("urlToImage"),
+                                dataArray.getJSONObject(i).getString("url"),
+                                dataArray.getJSONObject(i).getString("publishedAt")
+                            )
+                        }
                     }
                 }
 
                 page++
                 isLoading = false
-//                newsRecyclerView.adapter =
-//                    NewsCardAdapter(this@MainActivity, data, this@MainActivity, newLayoutType)
-                newsAdapter!!.setData(data,newLayoutType)
+                if (refresh) {
+                    newsAdapter = NewsCardAdapter(this@MainActivity, data, this@MainActivity, newLayoutType)
+                    newsRecyclerView.adapter = newsAdapter
+                }
+                else {
+                    newsAdapter!!.setData(data, newLayoutType)
+                }
                 if (data.isNotEmpty()) {
                     emptyCard.visibility = View.GONE
                 }
@@ -349,6 +406,19 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
             }
             R.id.navShootingHistory -> {
                 val urlString = App.instance!!.gunMapUrl
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(urlString))
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                intent.setPackage("com.android.chrome")
+                try {
+                    startActivity(intent)
+                } catch (ex: ActivityNotFoundException) {
+                    // Chrome browser presumably not installed and open Kindle Browser
+                    intent.setPackage(null)
+                    startActivity(intent)
+                }
+            }
+            R.id.navStore -> {
+                val urlString = App.instance!!.storeUrl
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(urlString))
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 intent.setPackage("com.android.chrome")

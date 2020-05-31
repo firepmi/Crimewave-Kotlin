@@ -16,4 +16,8 @@
     <string name="terms_of_service">Terms of Service</string>
     <string name="shooting_history">Shooting History</string>
     <string name="color_rating_scale">Color Rating Scale</string>
+<!--    <string name="banner_id">ca-app-pub-3482826063737432/1983582893</string>-->
+    <string name="banner_id">ca-app-pub-2795479226639345/7339565320</string>
+    <string name="store">Store</string>
+
 </resources>
