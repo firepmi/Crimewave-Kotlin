@@ -21,6 +21,9 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.view.GravityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.android.billingclient.api.BillingClient
+import com.android.billingclient.api.BillingClientStateListener
+import com.android.billingclient.api.BillingResult
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
@@ -73,6 +76,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
             private set
     }
     var newsAdapter: NewsCardAdapter? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -166,7 +170,9 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
         }
 
         nav_view.setNavigationItemSelectedListener(this)
+
     }
+
     private fun onNewsFullScreenClicked(){
         if(llMap?.visibility == View.GONE) {
             llMap?.visibility = View.VISIBLE

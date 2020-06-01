@@ -9,8 +9,12 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import android.widget.Toast.LENGTH_LONG
+import android.widget.Toast.LENGTH_SHORT
 import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
+import com.android.billingclient.api.*
+import com.android.billingclient.api.BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED
+import com.android.billingclient.api.BillingClient.BillingResponseCode.OK
 import com.crime.wave.App
 import com.crime.wave.MainActivity
 import com.crime.wave.R
@@ -24,9 +28,12 @@ import java.io.IOException
 import java.util.*
 
 
-class LocationActivity : AppCompatActivity(){
-
+class LocationActivity : AppCompatActivity(), PurchasesUpdatedListener {
+    private lateinit var billingClient: BillingClient
+    private val skuList = listOf("custom_location")
     @SuppressLint("SetTextI18n")
+    var isPurchaseAvailable = false
+    lateinit var skuDetails:SkuDetails
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_location)
@@ -40,13 +47,7 @@ class LocationActivity : AppCompatActivity(){
             refreshView()
         }
         cvCustomLocation.setOnClickListener {
-            App.instance!!.isCustomLocation = true
-            val customLat = MPreferenceManager.readLocationInformation(this@LocationActivity, "customlat")
-            val customLon = MPreferenceManager.readLocationInformation(this@LocationActivity, "customlon")
-            if( customLat == 0.0 && customLon == 0.0) {
-                onSelectCustomLocation()
-            }
-            refreshView()
+            onCustomLocation()
         }
         selectCustomLocation.setOnClickListener {onSelectCustomLocation()}
 
@@ -54,8 +55,101 @@ class LocationActivity : AppCompatActivity(){
 
         val adRequest = AdRequest.Builder().build()
         adView.loadAd(adRequest)
-    }
 
+        setupBillingClient()
+    }
+    private fun onCustomLocation(){
+        App.instance!!.isCustomLocation = true
+        val customLat = MPreferenceManager.readLocationInformation(this@LocationActivity, "customlat")
+        val customLon = MPreferenceManager.readLocationInformation(this@LocationActivity, "customlon")
+        if( customLat == 0.0 && customLon == 0.0) {
+            onSelectCustomLocation()
+        }
+        refreshView()
+    }
+    private fun setupBillingClient() {
+        billingClient = BillingClient.newBuilder(this)
+            .enablePendingPurchases()
+            .setListener(this)
+            .build()
+        billingClient.startConnection(object : BillingClientStateListener {
+            override fun onBillingSetupFinished(billingResult: BillingResult) {
+                if (billingResult.responseCode == OK) {
+                    // The BillingClient is setup successfully
+                    loadAllSKUs()
+                }
+            }
+
+            override fun onBillingServiceDisconnected() {
+                // Try to restart the connection on the next request to
+                // Google Play by calling the startConnection() method.
+
+            }
+        })
+    }
+    private fun loadAllSKUs() = if (billingClient.isReady) {
+        val params = SkuDetailsParams
+            .newBuilder()
+            .setSkusList(skuList)
+            .setType(BillingClient.SkuType.INAPP)
+            .build()
+        billingClient.querySkuDetailsAsync(params) { billingResult, skuDetailsList ->
+            // Process the result.
+            if (billingResult.responseCode == OK && skuDetailsList.isNotEmpty()) {
+                for (skuDetails in skuDetailsList) {
+                    //this will return both the SKUs from Google Play Console
+                    if (skuDetails.sku == "custom_location"){
+                        this.skuDetails = skuDetails
+                        this.isPurchaseAvailable = true
+                    }
+                }
+            }
+        }
+    } else {
+        println("Billing Client not ready")
+    }
+    private fun onSelectCustomLocation(){
+        if(isPurchaseAvailable) {
+            onPurchaseCustomLocation(skuDetails)
+        }
+        else {
+            Toast.makeText(this,"This service is not available for now.", LENGTH_SHORT).show();
+        }
+    }
+    private fun onPurchaseCustomLocation(skuDetails:SkuDetails){
+        val billingFlowParams = BillingFlowParams
+            .newBuilder()
+            .setSkuDetails(skuDetails)
+            .build()
+        billingClient.launchBillingFlow(this, billingFlowParams)
+    }
+    override fun onPurchasesUpdated(
+        billingResult: BillingResult?,
+        purchases: MutableList<Purchase>?
+    ) {
+        if (billingResult?.responseCode == OK && purchases != null) {
+            for (purchase in purchases) {
+                acknowledgePurchase(purchase.purchaseToken)
+            }
+        } else if (billingResult?.responseCode == BillingClient.BillingResponseCode.USER_CANCELED) {
+            // Handle an error caused by a user cancelling the purchase flow.
+
+        } else {
+            // Handle any other error codes.
+        }
+    }
+    private fun acknowledgePurchase(purchaseToken: String) {
+        val params = AcknowledgePurchaseParams.newBuilder()
+            .setPurchaseToken(purchaseToken)
+            .build()
+        billingClient.acknowledgePurchase(params) { billingResult ->
+            val responseCode = billingResult.responseCode
+            val debugMessage = billingResult.debugMessage
+            if (responseCode == OK || responseCode == ITEM_ALREADY_OWNED) {
+                onSelectLocationDialog()
+            }
+        }
+    }
     override fun onStop() {
         super.onStop()
         MainActivity.instance!!.crimeRadarFragment.getDataLocation()
@@ -135,7 +229,8 @@ class LocationActivity : AppCompatActivity(){
             }
         }
     }
-    private fun onSelectCustomLocation(){
+
+    fun onSelectLocationDialog(){
         var latitude = MPreferenceManager.readLocationInformation(this@LocationActivity, "customlat")
         var longitude = MPreferenceManager.readLocationInformation(this@LocationActivity, "customlon")
         if(latitude == 0.0 && longitude == 0.0) {
@@ -187,4 +282,6 @@ class LocationActivity : AppCompatActivity(){
             }
         }
     }
+
+
 }

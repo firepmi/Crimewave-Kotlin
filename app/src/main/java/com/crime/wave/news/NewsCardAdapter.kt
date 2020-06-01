@@ -35,18 +35,25 @@ class NewsCardAdapter(
 ) :
     RecyclerView.Adapter<NewsCardAdapter.ViewHolder?>() {
     private val mInflater: LayoutInflater = LayoutInflater.from(context)
+    private var viewType = 0
 
     // inflates the row layout from xml when needed
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        this.viewType = viewType
         return if(viewType == 0) {
             val view: View = if (type == 0) {
                 mInflater.inflate(R.layout.item_news, parent, false)
             } else {
                 mInflater.inflate(R.layout.item_news_list, parent, false)
             }
-            return ViewHolder(view)
+            ViewHolder(view)
         } else {
-            ViewHolder(mInflater.inflate(R.layout.item_ads, parent, false))
+            val view: View = if (type == 0) {
+                mInflater.inflate(R.layout.item_ads, parent, false)
+            } else {
+                mInflater.inflate(R.layout.item_ads_list, parent, false)
+            }
+            ViewHolder(view)
         }
     }
 
