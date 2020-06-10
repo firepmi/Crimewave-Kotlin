@@ -59,13 +59,15 @@ class LocationActivity : AppCompatActivity(), PurchasesUpdatedListener {
         setupBillingClient()
     }
     private fun onCustomLocation(){
-        App.instance!!.isCustomLocation = true
         val customLat = MPreferenceManager.readLocationInformation(this@LocationActivity, "customlat")
         val customLon = MPreferenceManager.readLocationInformation(this@LocationActivity, "customlon")
         if( customLat == 0.0 && customLon == 0.0) {
             onSelectCustomLocation()
         }
-        refreshView()
+        else {
+            App.instance!!.isCustomLocation = true
+            refreshView()
+        }
     }
     private fun setupBillingClient() {
         billingClient = BillingClient.newBuilder(this)
@@ -127,15 +129,20 @@ class LocationActivity : AppCompatActivity(), PurchasesUpdatedListener {
         billingResult: BillingResult?,
         purchases: MutableList<Purchase>?
     ) {
+//        onSelectLocationDialog()
         if (billingResult?.responseCode == OK && purchases != null) {
             for (purchase in purchases) {
                 acknowledgePurchase(purchase.purchaseToken)
             }
         } else if (billingResult?.responseCode == BillingClient.BillingResponseCode.USER_CANCELED) {
             // Handle an error caused by a user cancelling the purchase flow.
-
-        } else {
+            Toast.makeText(this, "Purchase Canceled by user", LENGTH_LONG).show()
+        } else if (billingResult?.responseCode == ITEM_ALREADY_OWNED) {
+            onSelectLocationDialog()
+        }
+        else {
             // Handle any other error codes.
+            Toast.makeText(this, "Purchase failed with error code ${billingResult?.responseCode}", LENGTH_LONG).show()
         }
     }
     private fun acknowledgePurchase(purchaseToken: String) {
@@ -147,6 +154,9 @@ class LocationActivity : AppCompatActivity(), PurchasesUpdatedListener {
             val debugMessage = billingResult.debugMessage
             if (responseCode == OK || responseCode == ITEM_ALREADY_OWNED) {
                 onSelectLocationDialog()
+            }
+            else {
+                Toast.makeText(this, debugMessage, LENGTH_LONG).show()
             }
         }
     }
@@ -230,7 +240,8 @@ class LocationActivity : AppCompatActivity(), PurchasesUpdatedListener {
         }
     }
 
-    fun onSelectLocationDialog(){
+    private fun onSelectLocationDialog(){
+        App.instance!!.isCustomLocation = true
         var latitude = MPreferenceManager.readLocationInformation(this@LocationActivity, "customlat")
         var longitude = MPreferenceManager.readLocationInformation(this@LocationActivity, "customlon")
         if(latitude == 0.0 && longitude == 0.0) {
