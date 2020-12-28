@@ -320,7 +320,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
         }
 
         Log.d("news link", link)
-        val stringRequest = StringRequest(Request.Method.GET, link, Response.Listener { response ->
+        val stringRequest = StringRequest(Request.Method.GET, link, { response ->
             val resultObject = JSONObject(response)
             val dataArray = resultObject.getJSONArray("articles")
             if (dataArray.length() > 0) {
@@ -367,10 +367,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
                 }
             }
         },
-        Response.ErrorListener {
-            it?.printStackTrace()
-            isLoading = false
-        })
+            {
+                it?.printStackTrace()
+                isLoading = false
+            })
         queue.add(stringRequest)
     }
     fun onSelectContent(index:Int) {
