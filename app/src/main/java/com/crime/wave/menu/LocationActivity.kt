@@ -97,8 +97,8 @@ class LocationActivity : AppCompatActivity(), PurchasesUpdatedListener {
             .build()
         billingClient.querySkuDetailsAsync(params) { billingResult, skuDetailsList ->
             // Process the result.
-            if (billingResult.responseCode == OK && skuDetailsList.isNotEmpty()) {
-                for (skuDetails in skuDetailsList) {
+            if (billingResult.responseCode == OK && skuDetailsList!!.isNotEmpty()) {
+                for (skuDetails in skuDetailsList!!) {
                     //this will return both the SKUs from Google Play Console
                     if (skuDetails.sku == "custom_location"){
                         this.skuDetails = skuDetails
@@ -126,7 +126,7 @@ class LocationActivity : AppCompatActivity(), PurchasesUpdatedListener {
         billingClient.launchBillingFlow(this, billingFlowParams)
     }
     override fun onPurchasesUpdated(
-        billingResult: BillingResult?,
+        billingResult: BillingResult,
         purchases: MutableList<Purchase>?
     ) {
 //        onSelectLocationDialog()

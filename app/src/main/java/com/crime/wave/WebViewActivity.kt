@@ -52,7 +52,7 @@ class WebViewActivity : AppCompatActivity(){
 
         webView.webViewClient = CustomWebViewClient()
         webView.webChromeClient = WebChromeClient()
-        webView.loadUrl(url)
+        webView.loadUrl(url!!)
 
         btnBack.setOnClickListener {
             finish()

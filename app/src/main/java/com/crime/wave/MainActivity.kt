@@ -21,11 +21,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.view.GravityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.android.billingclient.api.BillingClient
-import com.android.billingclient.api.BillingClientStateListener
-import com.android.billingclient.api.BillingResult
+import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
-import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.crime.wave.crimeRadar.CrimeRadarFragment
@@ -44,8 +41,15 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.layout_main.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import java.io.BufferedReader
 import java.io.IOException
+import java.io.InputStream
+import java.io.InputStreamReader
+import java.net.HttpURLConnection
+import java.net.URL
 import java.net.URLEncoder
 import java.util.*
 
@@ -98,7 +102,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
         supportFragmentManager.beginTransaction()
             .replace(R.id.contentLayout, crimeRadarFragment).commitAllowingStateLoss()
 
-        newsAdapter = NewsCardAdapter(this@MainActivity, data,  this@MainActivity)
+        newsAdapter = NewsCardAdapter(this@MainActivity, data, this@MainActivity)
         newsRecyclerView.apply {
             layoutManager = LinearLayoutManager(
                 this@MainActivity,
@@ -110,14 +114,21 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
         if (data.isNotEmpty()) {
             emptyCard.visibility = View.GONE
         }
-        if (ActivityCompat.checkSelfPermission(this@MainActivity,
+        if (ActivityCompat.checkSelfPermission(
+                this@MainActivity,
                 Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this@MainActivity,
+            ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
+                this@MainActivity,
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            ActivityCompat.requestPermissions(this,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), fineLocationPermissionRequest)
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ), fineLocationPermissionRequest
+            )
         }
         else {
             val intent = Intent(this, LocationUpdaterService::class.java)
@@ -142,7 +153,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
                 page = 0
                 data = arrayOf()
                 isLoading = false
-                newsAdapter!!.setData(data,newLayoutType)
+                newsAdapter!!.setData(data, newLayoutType)
                 getNews(tab.position)
             }
         })
@@ -192,7 +203,12 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
                     false
                 )
 //                newsAdapter!!.setData(data,newLayoutType)
-                newsAdapter = NewsCardAdapter(this@MainActivity, data, this@MainActivity, newLayoutType)
+                newsAdapter = NewsCardAdapter(
+                    this@MainActivity,
+                    data,
+                    this@MainActivity,
+                    newLayoutType
+                )
                 newsRecyclerView.adapter = newsAdapter
             }
         }
@@ -213,8 +229,13 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
                     LinearLayoutManager.VERTICAL,
                     false
                 )
-                newsAdapter!!.setData(data,newLayoutType)
-                newsAdapter = NewsCardAdapter(this@MainActivity, data, this@MainActivity, newLayoutType)
+                newsAdapter!!.setData(data, newLayoutType)
+                newsAdapter = NewsCardAdapter(
+                    this@MainActivity,
+                    data,
+                    this@MainActivity,
+                    newLayoutType
+                )
                 newsRecyclerView.adapter = newsAdapter
                 if (data.isNotEmpty()) {
                     emptyCard.visibility = View.GONE
@@ -302,7 +323,8 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
                 if (cityName != "") {
                     tabLayout.getTabAt(0)?.text = "$cityName News"
                     val cityParam: String = URLEncoder.encode(cityName, "utf-8")
-                    link = "http://newsapi.org/v2/everything?page=$p&apiKey=73373c784bd24a679fafc03522618936&q=$cityParam"
+                    link =
+                        "https://newsapi.org/v2/everything?page=$p&apiKey=73373c784bd24a679fafc03522618936&q=$cityParam"
                 }
             }
             1 -> { //US News
@@ -312,68 +334,92 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
                 link = App.instance!!.newsUrl + "page=$p&country=us&category=" + tabString[index]
             }
             7 -> {  //Politics
-                link = "http://newsapi.org/v2/everything?page=$p&apiKey=73373c784bd24a679fafc03522618936&language=en&q=" + tabString[index]
+                link =
+                    "https://newsapi.org/v2/everything?page=$p&apiKey=73373c784bd24a679fafc03522618936&language=en&q=" + tabString[index]
             }
             8 -> {
-                link = "http://newsapi.org/v2/top-headlines?page=$p&apiKey=73373c784bd24a679fafc03522618936&language=en"
+                link =
+                    "https://newsapi.org/v2/top-headlines?page=$p&apiKey=73373c784bd24a679fafc03522618936&language=en"
             }
         }
 
         Log.d("news link", link)
-        val stringRequest = StringRequest(Request.Method.GET, link, { response ->
-            val resultObject = JSONObject(response)
-            val dataArray = resultObject.getJSONArray("articles")
-            if (dataArray.length() > 0) {
-                var refresh = false
-                if (data.isEmpty()) {
-                    refresh = true
-                }
-                for (i in 0 until dataArray.length()) {
-                    if (dataArray.getJSONObject(i).getString("title") != "" && dataArray.getJSONObject(i).getString("description") != "null" ) {
-                        val itemTitle = dataArray.getJSONObject(i).getString("title")
-                        val itemDescription = dataArray.getJSONObject(i).getString("description")
-                        val itemImage = dataArray.getJSONObject(i).getString("urlToImage")
-                        val itemUrl = dataArray.getJSONObject(i).getString("url")
-                        var ok = true
-                        for (dt in data) {
-                            if (dt.title == itemTitle || dt.description == itemDescription || dt.image == itemImage || dt.url == itemUrl) {
-                                ok = false
-                                break
+        val stringRequest =  object : StringRequest(
+            Request.Method.GET, link, { response ->
+                val resultObject = JSONObject(response)
+                val dataArray = resultObject.getJSONArray("articles")
+                if (dataArray.length() > 0) {
+                    var refresh = false
+                    if (data.isEmpty()) {
+                        refresh = true
+                    }
+                    for (i in 0 until dataArray.length()) {
+                        if (dataArray.getJSONObject(i)
+                                .getString("title") != "" && dataArray.getJSONObject(
+                                i
+                            ).getString("description") != "null"
+                        ) {
+                            val itemTitle = dataArray.getJSONObject(i).getString("title")
+                            val itemDescription =
+                                dataArray.getJSONObject(i).getString("description")
+                            val itemImage = dataArray.getJSONObject(i).getString("urlToImage")
+                            val itemUrl = dataArray.getJSONObject(i).getString("url")
+                            var ok = true
+                            for (dt in data) {
+                                if (dt.title == itemTitle || dt.description == itemDescription || dt.image == itemImage || dt.url == itemUrl) {
+                                    ok = false
+                                    break
+                                }
+                            }
+                            if (ok) {
+                                data += NewsItem(
+                                    dataArray.getJSONObject(i).getString("title"),
+                                    dataArray.getJSONObject(i).getString("description"),
+                                    dataArray.getJSONObject(i).getString("urlToImage"),
+                                    dataArray.getJSONObject(i).getString("url"),
+                                    dataArray.getJSONObject(i).getString("publishedAt")
+                                )
                             }
                         }
-                        if (ok) {
-                            data += NewsItem(
-                                dataArray.getJSONObject(i).getString("title"),
-                                dataArray.getJSONObject(i).getString("description"),
-                                dataArray.getJSONObject(i).getString("urlToImage"),
-                                dataArray.getJSONObject(i).getString("url"),
-                                dataArray.getJSONObject(i).getString("publishedAt")
-                            )
-                        }
+                    }
+
+                    page++
+                    isLoading = false
+                    if (refresh) {
+                        newsAdapter = NewsCardAdapter(
+                            this@MainActivity,
+                            data,
+                            this@MainActivity,
+                            newLayoutType
+                        )
+                        newsRecyclerView.adapter = newsAdapter
+                    } else {
+                        newsAdapter!!.setData(data, newLayoutType)
+                    }
+                    if (data.isNotEmpty()) {
+                        emptyCard.visibility = View.GONE
                     }
                 }
-
-                page++
-                isLoading = false
-                if (refresh) {
-                    newsAdapter = NewsCardAdapter(this@MainActivity, data, this@MainActivity, newLayoutType)
-                    newsRecyclerView.adapter = newsAdapter
-                }
-                else {
-                    newsAdapter!!.setData(data, newLayoutType)
-                }
-                if (data.isNotEmpty()) {
-                    emptyCard.visibility = View.GONE
-                }
-            }
-        },
+            },
             {
                 it?.printStackTrace()
                 isLoading = false
-            })
+            }) {
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["User-Agent"] = "PostmanRuntime/7.26.8"
+                return headers
+            }
+        }
+
+        stringRequest.retryPolicy = DefaultRetryPolicy(
+            10000,
+            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        );
         queue.add(stringRequest)
     }
-    fun onSelectContent(index:Int) {
+    fun onSelectContent(index: Int) {
         when {
             index < 8 -> {
                 supportFragmentManager.beginTransaction()
@@ -390,7 +436,48 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
             }
         }
     }
+    private suspend fun httpGet(myURL: String?): String? {
 
+        val result = withContext(Dispatchers.IO) {
+            val inputStream: InputStream
+
+
+            // create URL
+            val url: URL = URL(myURL)
+
+            // create HttpURLConnection
+            val conn: HttpURLConnection = url.openConnection() as HttpURLConnection
+
+            // make GET request to the given URL
+            conn.connect()
+
+            // receive response as inputStream
+            inputStream = conn.inputStream
+
+            // convert inputstream to string
+            if (inputStream != null)
+                convertInputStreamToString(inputStream)
+            else
+                "Did not work!"
+
+
+        }
+        return result
+    }
+    private fun convertInputStreamToString(inputStream: InputStream): String {
+        val bufferedReader:BufferedReader? = BufferedReader(InputStreamReader(inputStream))
+
+        var line:String? = bufferedReader?.readLine()
+        var result:String = ""
+
+        while (line != null) {
+            result += line
+            line = bufferedReader?.readLine()
+        }
+
+        inputStream.close()
+        return result
+    }
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -405,7 +492,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.navLocation-> {
+            R.id.navLocation -> {
                 val i = Intent(this, LocationActivity::class.java)
                 startActivity(i)
                 overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
@@ -441,13 +528,13 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
                 startActivity(i)
                 overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
             }
-            R.id.navPrivacyPolicy-> {
+            R.id.navPrivacyPolicy -> {
                 val i = Intent(this, PdfViewerActivity::class.java)
                 i.putExtra("name", "privacypolicy.pdf")
                 startActivity(i)
                 overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
             }
-            R.id.navTermsOfService-> {
+            R.id.navTermsOfService -> {
                 val i = Intent(this, PdfViewerActivity::class.java)
                 i.putExtra("name", "termsofservice.pdf")
                 startActivity(i)

@@ -61,13 +61,13 @@ class LocationUpdaterService : Service() {
                 LocationManager.GPS_PROVIDER,
                 10,
                 50f,
-                mLocationListener
+                mLocationListener!!
             )
             if (isNetworkEnabled) mLocationManager!!.requestLocationUpdates(
                 LocationManager.NETWORK_PROVIDER,
                 10,
                 50f,
-                mLocationListener
+                mLocationListener!!
             )
             if (!isGPSEnabled && !isNetworkEnabled) {
                 val intent = Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
@@ -88,7 +88,7 @@ class LocationUpdaterService : Service() {
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            mLocationManager!!.removeUpdates(mLocationListener)
+            mLocationManager!!.removeUpdates(mLocationListener!!)
         }
         isRunning = false
     }

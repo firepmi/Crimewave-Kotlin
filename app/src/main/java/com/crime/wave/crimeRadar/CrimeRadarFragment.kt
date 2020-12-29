@@ -280,7 +280,7 @@ class CrimeRadarFragment : Fragment() {
                     val link: String = snippet[1]
 
                     val stringRequest = StringRequest(
-                        Request.Method.GET, link, Response.Listener { response ->
+                        Request.Method.GET, link, { response ->
 //                        val resultObject = JSONObject(response)
                             ShowProgressDialog.hideProgressDialog()
                             val content: Spanned = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -320,7 +320,7 @@ class CrimeRadarFragment : Fragment() {
                                     startActivity(browserIntent)
                                 }.show()
                         },
-                        Response.ErrorListener { error ->
+                        { error ->
                             Log.d("crime volley", error.localizedMessage!!)
                             ShowProgressDialog.hideProgressDialog()
                         })

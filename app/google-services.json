@@ -1,0 +1,99 @@
+{
+  "project_info": {
+    "project_number": "367369605457",
+    "firebase_url": "https://amigdala-41019.firebaseio.com",
+    "project_id": "amigdala-41019",
+    "storage_bucket": "amigdala-41019.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:367369605457:android:ae383c3f42fa4b3d88c370",
+        "android_client_info": {
+          "package_name": "com.crime.wave"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "367369605457-kn6im4pbhtgm0sn3rv0ujbf517s6rfp2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.crime.wave",
+            "certificate_hash": "8c9a763eb4aa8b96d2ea1f19bc429d6accd0b55b"
+          }
+        },
+        {
+          "client_id": "367369605457-ms694a8qjj7g86nim3o8tvculcq90sug.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAugE6JX-alnjYtt_GEs4vS86p5FpOVwbk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "367369605457-ms694a8qjj7g86nim3o8tvculcq90sug.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "367369605457-1r4ssv6h24p3jvas7f1s29qbb5d00800.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "maniaco.amigdala"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:367369605457:android:51960db86df9515d",
+        "android_client_info": {
+          "package_name": "com.local.newsly"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "367369605457-m6c0qtjc9s0venqfb95pv01a09f9hutn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.local.newsly",
+            "certificate_hash": "ac399d3aa9e5bb3093a698251fc96277a3b279aa"
+          }
+        },
+        {
+          "client_id": "367369605457-ms694a8qjj7g86nim3o8tvculcq90sug.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAugE6JX-alnjYtt_GEs4vS86p5FpOVwbk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "367369605457-ms694a8qjj7g86nim3o8tvculcq90sug.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "367369605457-1r4ssv6h24p3jvas7f1s29qbb5d00800.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "maniaco.amigdala"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
