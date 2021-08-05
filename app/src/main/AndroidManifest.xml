@@ -53,7 +53,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBX-HDsCLh2zSa2U7auZOeT1q3PwJZhax8" />
+            android:value="AIzaSyBcK5lq5NlZ9-y0l38muyPEwKZxC8i-kKY" />
         <service android:name=".utils.LocationUpdaterService"
             android:enabled="true"
             android:exported="true" />

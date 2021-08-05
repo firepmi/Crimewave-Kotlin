@@ -1,10 +1,12 @@
 package com.crime.wave.crimeRadar
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
@@ -17,11 +19,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import cn.refactor.lib.colordialog.PromptDialog
 import com.android.volley.Request
-import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.crime.wave.App
@@ -51,7 +53,7 @@ import kotlin.math.roundToInt
  */
 class CrimeRadarFragment : Fragment() {
     private var map: GoogleMap? = null
-    var tabTitles = arrayOf(
+    private var tabTitles = arrayOf(
         "Robbery",
         "Burglary",
         "Theft",
@@ -63,10 +65,10 @@ class CrimeRadarFragment : Fragment() {
     )
 
     //    int currentIndex = Global.crimeType;
-    var currentIndex = 0
+    private var currentIndex = 0
     private var jsonCrimes = JSONArray()
     private var currentCrimeArray = JSONArray()
-    var crimeLevel = App.instance!!.crimeLevel
+    private var crimeLevel = App.instance!!.crimeLevel
     private var mapType = 0
     private var mapTypes = intArrayOf(
         GoogleMap.MAP_TYPE_NORMAL,
@@ -79,7 +81,7 @@ class CrimeRadarFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         val view:View = inflater.inflate(R.layout.fragment_crime_radar, container, false)
         activity?.let {
             LocalBroadcastManager.getInstance(it).registerReceiver(
@@ -95,7 +97,17 @@ class CrimeRadarFragment : Fragment() {
 
         view.mapView.getMapAsync { mMap ->
             // For showing a move to my location button
-            mMap.isMyLocationEnabled = false
+            if (ActivityCompat.checkSelfPermission(
+                    requireActivity(),
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                    requireActivity(),
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                mMap.isMyLocationEnabled = false
+            }
+
             val markerOptions = MarkerOptions()
             val latLng = LatLng(
                 MPreferenceManager.readDoubleInformation(activity, "lat"),
@@ -156,15 +168,19 @@ class CrimeRadarFragment : Fragment() {
     }
     fun getDataLocation() {
         if(activity == null) return
+        var latitude = MPreferenceManager.readDoubleInformation(activity, "lat")
+        var longitude = MPreferenceManager.readDoubleInformation(activity, "lon")
+        if(latitude == 0.0 || longitude == 0.0) {
+//            latitude = 36.121439
+//            longitude = -115.150098
+        }
         val url =
-            "http://api.spotcrime.com/crimes.json?lat=" + MPreferenceManager.readDoubleInformation(activity,"lat").toString() +
-                    "&lon=" + MPreferenceManager.readDoubleInformation(activity, "lon").toString() + "&radius=0.02&key=" +
-                    App.instance!!.key + "&callback="
+            "http://api.spotcrime.com/crimes.json?lat=$latitude&lon=$longitude&radius=0.02&key=${App.instance!!.key}&callback="
 
         val queue = Volley.newRequestQueue(activity)
 
         val stringRequest = StringRequest(
-            Request.Method.GET, url, Response.Listener { response ->
+            Request.Method.GET, url, { response ->
 
                 jsonCrimes = if (response == null) {
                     JSONArray(ArrayList<String?>())
@@ -176,7 +192,7 @@ class CrimeRadarFragment : Fragment() {
                 App.instance!!.crimeLevel = crimeLevel
                 setTitleBar()
             },
-            Response.ErrorListener {
+            {
                 it?.printStackTrace()
             })
         queue.add(stringRequest)
@@ -354,8 +370,7 @@ class CrimeRadarFragment : Fragment() {
 
             val weekday = 2
             val weekday2 = 3
-            var weekdayResult: Int
-            weekdayResult = weekday2 - weekday
+            val weekdayResult: Int = weekday2 - weekday
             when {
                 weekdayResult == 0 -> {
                     dateArray.add("1.0")
@@ -375,8 +390,7 @@ class CrimeRadarFragment : Fragment() {
             }
             val hour = 5
             val hour2 = 7
-            var hourDifference: Int
-            hourDifference = hour2 - hour
+            val hourDifference: Int = hour2 - hour
             when {
                 hourDifference == 0 -> {
                     time.add("1.0")

@@ -22,7 +22,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.view.GravityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.android.volley.DefaultRetryPolicy
-import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.crime.wave.crimeRadar.CrimeRadarFragment
@@ -41,15 +40,8 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.layout_main.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.io.BufferedReader
 import java.io.IOException
-import java.io.InputStream
-import java.io.InputStreamReader
-import java.net.HttpURLConnection
-import java.net.URL
 import java.net.URLEncoder
 import java.util.*
 
@@ -345,7 +337,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
 
         Log.d("news link", link)
         val stringRequest =  object : StringRequest(
-            Request.Method.GET, link, { response ->
+            Method.GET, link, { response ->
                 val resultObject = JSONObject(response)
                 val dataArray = resultObject.getJSONArray("articles")
                 if (dataArray.length() > 0) {
@@ -435,48 +427,6 @@ class MainActivity : AppCompatActivity(), ItemClickListener,NavigationView.OnNav
                 supportFragmentManager.executePendingTransactions()
             }
         }
-    }
-    private suspend fun httpGet(myURL: String?): String? {
-
-        val result = withContext(Dispatchers.IO) {
-            val inputStream: InputStream
-
-
-            // create URL
-            val url: URL = URL(myURL)
-
-            // create HttpURLConnection
-            val conn: HttpURLConnection = url.openConnection() as HttpURLConnection
-
-            // make GET request to the given URL
-            conn.connect()
-
-            // receive response as inputStream
-            inputStream = conn.inputStream
-
-            // convert inputstream to string
-            if (inputStream != null)
-                convertInputStreamToString(inputStream)
-            else
-                "Did not work!"
-
-
-        }
-        return result
-    }
-    private fun convertInputStreamToString(inputStream: InputStream): String {
-        val bufferedReader:BufferedReader? = BufferedReader(InputStreamReader(inputStream))
-
-        var line:String? = bufferedReader?.readLine()
-        var result:String = ""
-
-        while (line != null) {
-            result += line
-            line = bufferedReader?.readLine()
-        }
-
-        inputStream.close()
-        return result
     }
     override fun onRequestPermissionsResult(
         requestCode: Int,

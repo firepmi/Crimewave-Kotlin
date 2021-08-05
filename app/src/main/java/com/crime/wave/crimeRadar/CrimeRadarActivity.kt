@@ -194,18 +194,24 @@ class CrimeRadarActivity : AppCompatActivity() {
     }
 
     private fun getDataLocation() {
-        val url =
-            "http://api.spotcrime.com/crimes.json?lat=" + MPreferenceManager.readDoubleInformation(
-                this,
-                "lat"
-            ).toString() + "&lon=" + MPreferenceManager.readDoubleInformation(this, "lon")
-                .toString() + "&radius=0.01&key=" + App.instance!!.key + "&callback="
+        var lat = MPreferenceManager.readDoubleInformation(
+            this,
+            "lat"
+        )
+        var lon = MPreferenceManager.readDoubleInformation(this, "lon")
 
+        if(lat == 0.0 || lon == 0.0) {
+//            lat = 36.121439
+//            lon = -115.150098
+        }
+        val url =
+            "http://api.spotcrime.com/crimes.json?lat=$lat&lon=$lon&radius=0.01&key=${App.instance!!.key}&callback="
+
+        Log.d("url",url)
         val queue = Volley.newRequestQueue(this)
 
         val stringRequest = StringRequest(
-            Request.Method.GET, url, Response.Listener { response ->
-
+            Request.Method.GET, url, { response ->
                 jsonCrimes = if (response == null) {
                     JSONArray(ArrayList<String?>())
                 } else {
@@ -214,9 +220,8 @@ class CrimeRadarActivity : AppCompatActivity() {
                 }
                 crimeLevel = checkForLocation()
                 setTitleBar()
-
-        },
-            Response.ErrorListener {
+            },
+            {
                 it?.printStackTrace()
             })
         queue.add(stringRequest)
